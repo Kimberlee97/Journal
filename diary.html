@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary - My Diary</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 id="diary-title">My Diary</h1>
+        <a href="profile.html" class="button">Profile</a>
+        <a href="index.html" class="button">Home</a>
+    </header>
+    <main>
+        <form id="diary-form">
+            <textarea id="entry-text" placeholder="Write your diary entry here..."></textarea>
+            <label for="mood-select">Select Mood:</label>
+            <select id="mood-select">
+                <option value="Happy">Happy</option>
+                <option value="Sad">Sad</option>
+                <option value="Angry">Angry</option>
+                <option value="Neutral">Neutral</option>
+            </select>
+            <button type="submit" class="button">Save Entry</button>
+        </form>
+        <section id="entries">
+            <h2>Your Entries</h2>
+            <ul id="entries-list"></ul>
+        </section>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const diaryTitle = document.getElementById('diary-title');
+            const profile = JSON.parse(localStorage.getItem('profile')) || {};
+            diaryTitle.textContent = profile.diaryName || 'My Diary';
+
+            const form = document.getElementById('diary-form');
+            const entryText = document.getElementById('entry-text');
+            const moodSelect = document.getElementById('mood-select');
+            const entriesList = document.getElementById('entries-list');
+
+            const loadEntries = () => {
+                const entries = JSON.parse(localStorage.getItem('diaryEntries')) || [];
+                entriesList.innerHTML = '';
+                entries.forEach((entry, index) => {
+                    const listItem = document.createElement('li');
+                    const entryContent = document.createElement('p');
+                    entryContent.textContent = `${entry.text} (${entry.mood}) - ${entry.date}`;
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.className = 'button';
+                    deleteButton.onclick = () => deleteEntry(index);
+                    listItem.appendChild(entryContent);
+                    listItem.appendChild(deleteButton);
+                    entriesList.appendChild(listItem);
+                });
+            };
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const entry = entryText.value.trim();
+                const mood = moodSelect.value;
+                if (entry) {
+                    const entries = JSON.parse(localStorage.getItem('diaryEntries')) || [];
+                    entries.push({
+                        text: entry,
+                        mood: mood,
+                        date: new Date().toLocaleDateString(),
+                    });
+                    localStorage.setItem('diaryEntries', JSON.stringify(entries));
+                    entryText.value = '';
+                    loadEntries();
+                } else {
+                    alert('Please write something before saving.');
+                }
+            });
+
+            const deleteEntry = (index) => {
+                const entries = JSON.parse(localStorage.getItem('diaryEntries')) || [];
+                entries.splice(index, 1);
+                localStorage.setItem('diaryEntries', JSON.stringify(entries));
+                loadEntries();
+            };
+
+            loadEntries();
+        });
+    </script>
+</body>
+</html>
